@@ -3,7 +3,7 @@
 import tensorflow as tf
 
 class Network():
-    def __init__(self, layer_dim, layer_types):
+    def __init__(self, layer_dim, layer_types, print_graph=False):
         """
         Initialize Network based on manual layer dimensions and layer activations
         :param layer_dim: list of layer dimensions (min length 2)
@@ -18,15 +18,17 @@ class Network():
         self.graph = tf.Graph()
         self.hidden_layers = []
         with self.graph.as_default():
-            self.input_layer = tf.placeholder(name='input', shape=[None, layer_dim[0]], dtype = tf.float32)
+            self.input_layer = tf.compat.v1.placeholder(name='input', shape=[None, layer_dim[0]], dtype = tf.float32)
             for i in range(1, len(layer_dim)):
                 self.hidden_layers.append(tf.layers.dense(
                     self.input_layer if i == 1 else self.hidden_layers[i-2],
                     layer_dim[i],
                     activation=layer_types[i],
-                    name=("hidden layer %d" % i) if i < len(layer_dim)-1 else "output"
+                    name=("hidden_layer_%d" % i) if i < len(layer_dim)-1 else "output"
                 ))
             self.output_layer = self.hidden_layers.pop(len(self.hidden_layers)-1)
+
+
 
     def __str__(self):
         formatted = 'Input Layer: %s' % self.input_layer.shape
