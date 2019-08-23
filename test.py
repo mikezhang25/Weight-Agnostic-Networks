@@ -1,6 +1,5 @@
 import unittest as ut
 import warnings
-import tensorflow as tf
 
 from src import network, population, environment
 
@@ -19,13 +18,13 @@ class EnvorionmentTest(ut.TestCase):
                 9
             ],
             [
-                None,
-                tf.nn.relu,
-                tf.nn.tanh,
-                tf.nn.sigmoid,
-                tf.nn.softmax
-            ])
-        print(nn)
+                'softmax',
+                'relu',
+                'tanh',
+                'sigmoid',
+                'softmax'
+            ],
+        print_graph=True)
 
     def test_population_creation(self):
         """

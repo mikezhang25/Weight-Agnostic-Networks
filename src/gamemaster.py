@@ -1,4 +1,17 @@
-""" Contains the GameMaster class, which is responsible for fitness evaluation """
+""" Contains the test environment for evaluation """
+import gym
 
-class GameMaster:
+class Environment:
     def __init__(self):
+        self.env = gym.make('MountainCar-v0')
+        self.env.render()
+
+    def step(self, action):
+        self.env.render()
+        return self.env.step(action)
+
+    def reset(self):
+        return self.env.reset()
+
+    def close(self):
+        self.env.close()
