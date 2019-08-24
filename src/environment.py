@@ -3,8 +3,9 @@ import gym
 
 class Environment:
     def __init__(self):
-        self.env = gym.make('MountainCar-v0')
+        self.env = gym.make('MountainCarContinuous-v0')
         self.env.render()
+        self.env.reset()
 
     def step(self, action):
         self.env.render()

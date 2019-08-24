@@ -23,17 +23,33 @@ class Network():
         self.model = keras.Sequential()
 
         # input layer, must specify input shape
-        self.model.add(Dense(layer_dim[0], activation=layer_types[0], input_dim=input_shape))
+        self.model.add(Dense(layer_dim[0], activation=layer_types[0], input_dim=input_shape, name="input_layer"))
 
         # add hidden and output layers
         for i in range(1, len(layer_dim)):
-            self.model.add(Dropout(dropout))
-            self.mode.add(Dense(layer_dim[i], activation=layer_types[i]))
+            self.model.add(Dropout(dropout, name="intermediate_%d"%i))
+            self.model.add(Dense(layer_dim[i], activation=layer_types[i], name="hidden_layer_%d"%i if i < len(layer_dim)-1 else "output_layer"))
 
         if print_graph: self.model.summary()
 
+    def run(self, inputs):
+        pass
 
-    # def __init__(self, layer_dim, layer_types, print_graph=False):
+    def tune_weights(self, train_data, train_labels, epochs=1, batch_size=64):
+        # specify training params: optimizer (for problem type), loss function, metrics (to train by)
+        self.model.compile(optimizer='rmsprop',
+                           loss='categorical_crossentropy', # default for multi-class classification
+                           metrics=['accuracy'])
+
+        # train the model
+        self.model.fit(train_data, train_labels, epochs=epochs, batch_size=batch_size)
+
+    def test(self, test_data, test_labels, batch_size=64):
+        return self.model.evaluate(test_data, test_labels, batch_size=batch_size)
+
+
+# Legacy changes too chicken to delete
+# def __init__(self, layer_dim, layer_types, print_graph=False):
     #     """
     #     Initialize Network based on manual layer dimensions and layer activations
     #     :param layer_dim: list of layer dimensions (min length 2)
@@ -57,7 +73,3 @@ class Network():
     #                 name=("hidden_layer_%d" % i) if i < len(layer_dim)-1 else "output"
     #             ))
     #         self.output_layer = self.hidden_layers.pop(len(self.hidden_layers)-1)
-
-    def run(self, inputs):
-        pass
-

@@ -23,15 +23,17 @@ class Population:
             "softmax":tf.nn.softmax
         }
         if random_init:
+            input_hidden_nodes = r.randint(1, self.MAX_LAYER_SIZE)
             for member in range(pop_size):
                 # print("Member %d:", member+1)
                 n = r.randint(3, self.MAX_LAYER_COUNT)
-                layer_dim = [input_shape] + [r.randint(1, self.MAX_LAYER_SIZE) for i in range(n-1)]
+                layer_dim = [input_hidden_nodes] + [r.randint(1, self.MAX_LAYER_SIZE) for i in range(n-1)]
                 layer_activations = [None] + [self.map_activation[self.valid_activations[r.randint(0, len(self.valid_activations)-1)]] for i in range(n-1)]
                 # print("\t%d layers", n)
                 # print("\tLayer Dimensions: %s" % layer_dim)
                 # print("\tLayer Activations: %s" % layer_activations)
                 self.members.append(net.Network(
+                    input_shape,
                     layer_dim,
                     layer_activations
                 ))
