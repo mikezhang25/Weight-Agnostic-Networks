@@ -106,7 +106,7 @@ class EnvorionmentTest(ut.TestCase):
     #     print("Child B:\n", child_b)
     #
     def test_evolution(self):
-        env = gamemaster.GameMaster()
+        env = gamemaster.GameMaster('MountainCarContinuous-v0')
         pop = population.Population(20, 1, 1, evaluator=env)
         pop.step_gen()
 
