@@ -1,8 +1,9 @@
 """ Contains the Population class, which handles members, evolution, and breeding """
 
+import os
 import tensorflow as tf
 import random as r
-from . import network as net
+import network as net
 
 class Population:
 
@@ -42,14 +43,32 @@ class Population:
     def set_evaluator(self, evaluator):
         self.evaluator = evaluator
 
-    def step_gen(self):
+    def evolve(self, step_num, save_progress=True, save_dir=''):
+        for gen in range(step_num+1):
+            try:
+                os.makedirs(save_dir)
+            except FileExistsError:
+                pass
+            self.step_gen(save_progress=save_progress, save_file=save_dir+("/gen-%d.txt"%(gen+1)))
+
+    def step_gen(self, save_progress=False, save_file=''):
         if self.evaluator == None:
             print("Population Error 1: No evaluator specified. Use <population>.set_evaluator() to specify evaluator")
             return
 
+        print("---------------------------------------------------")
         print("Evolving from Generation ", self.gen_count, "...")
         norm_fitness = self.get_normalized_fitness()
 
+        print("Saving Current Generation...")
+        self.members.sort(key=lambda x: x.fitness)
+        f = open(save_file, "w+")
+        for network in self.members:
+            f.write(str(network.get_printable()) + '\n')
+        f.close()
+        print("Current Generation Successfully Saved")
+        print("Best Fitness: %d" % self.members[0].fitness)
+        # save members by order of fitness
         mating_pool = self.get_mating_pool(norm_fitness)
 
         new_pop = []
@@ -57,7 +76,7 @@ class Population:
             # choose two parents at random
             parent_a = mating_pool[r.randint(0, len(mating_pool)-1)]
             parent_b = mating_pool[r.randint(0, len(mating_pool)-1)]
-            while parent_a == parent_b: parent_b = mating_pool[r.randint(0, 99)]
+            while parent_a == parent_b: parent_b = mating_pool[r.randint(0, len(mating_pool)-1)]
 
             child_a, child_b = self.cross(parent_a, parent_b)
             new_pop.append(child_a)
@@ -65,14 +84,14 @@ class Population:
 
         self.gen_count += 1
         print("Evolved Generation ", self.gen_count)
+        print("---------------------------------------------------")
 
     # TODO: Verify that positive-negative fitness mix doesn't screw up the norm
     def get_normalized_fitness(self):
         # evaluate fitness for every member
-        fitnesses = []
-        for network in self.members:
-            network.fitness = self.evaluator.eval_fitness(network)
-            fitnesses.append(network.fitness)
+        fitnesses = self.evaluator.eval_fitnesses(self.members)
+        for i, network in enumerate(self.members):
+            network.fitness = fitnesses[i]
 
         # check if there were a mix of positive/negative
         displacement = min(fitnesses)

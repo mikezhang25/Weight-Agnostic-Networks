@@ -1,6 +1,8 @@
 import pickle
 import cloudpickle
 import numpy as np
+import logging
+import multiprocessing as mpg
 from multiprocessing import Pipe, Process
 
 class SubprocVecEnv():
@@ -10,14 +12,15 @@ class SubprocVecEnv():
         no_of_envs = len(env_fns)
         self.remotes, self.work_remotes = \
             zip(*[Pipe() for _ in range(no_of_envs)])
-        self.ps = []
+        self.processes = []
+        mpg.log_to_stderr(logging.DEBUG)
 
         for wrk, rem, fn in zip(self.work_remotes, self.remotes, env_fns):
             proc = Process(target=worker,
                            args=(wrk, rem, CloudpickleWrapper(fn)))
-            self.ps.append(proc)
+            self.processes.append(proc)
 
-        for p in self.ps:
+        for p in self.processes:
             p.daemon = True
             p.start()
 
@@ -26,7 +29,8 @@ class SubprocVecEnv():
 
     def step_async(self, actions):
         if self.waiting:
-            print("Process Already Waiting")
+            print("Already Stepping")
+            return
         self.waiting = True
 
         for remote, action in zip(self.remotes, actions):
@@ -34,20 +38,17 @@ class SubprocVecEnv():
 
     def step_wait(self):
         if not self.waiting:
-            raise NotSteppingError
+            print("Not Stepping")
+            return None, None, None, None
         self.waiting = False
 
         results = [remote.recv() for remote in self.remotes]
-        obs, rews, dones, infos = zip(*results)
-        return np.stack(obs), np.stack(rews), np.stack(dones), infos
+        obs, rewards, dones, infos = zip(*results)
+        return np.stack(obs), np.stack(rewards), np.stack(dones), infos
 
     def step(self, actions):
         self.step_async(actions)
         return self.step_wait()
-
-    def render(self):
-        for remote in self.remotes:
-            remote.send(('render', None))
 
     def reset(self):
         for remote in self.remotes:
@@ -67,6 +68,31 @@ class SubprocVecEnv():
             p.join()
         self.closed = True
 
+def worker(remote, parent_remote, env_fn):
+    parent_remote.close()
+    env = env_fn()
+    while True:
+        cmd, data = remote.recv()
+
+        if cmd == 'step':
+            ob, reward, done, info = env.step(data)
+            if done:
+                ob = env.reset()
+            remote.send((ob, reward, done, info))
+
+        elif cmd == 'reset':
+            remote.send(env.reset())
+
+        elif cmd == 'render':
+            remote.send(env.render())
+
+        elif cmd == 'close':
+            remote.close()
+            break
+
+        else:
+            print("Command %s not recognized" % cmd)
+
 
 class CloudpickleWrapper(object):
     def __init__(self, x):
@@ -80,25 +106,3 @@ class CloudpickleWrapper(object):
 
     def __call__(self):
         return self.x()
-
-
-def worker(remote, parent_remote, env_fn):
-    parent_remote.close()
-    env = env_fn()
-    while True:
-        cmd, data = remote.recv()
-
-        if cmd == 'step':
-            ob, reward, done, info = env.step(data)
-            if done:
-                ob = env.reset()
-            remote.send((ob, reward, done, info))
-
-        elif cmd == 'render':
-            remote.send(env.render())
-
-        elif cmd == 'close':
-            remote.close()
-            break
-        else:
-            print("Command %s not recognized" % cmd)

@@ -1,13 +1,12 @@
 """ Contains Network class, which constitutes an individual in the population """
 
-import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
-import numpy as np
-
-class Network():
+class Network:
 
     def __init__(self, input_dim, output_n, layer_dim, layer_types, dropout=0.5, print_graph=False):
+        import keras
+        from keras.models import Sequential
+        from keras.layers import Dense, Dropout, Activation
+        import numpy as np
         """
         Initialize Network based on manual layer dimensions and layer activations
         :param (int)        input_dim: specifies n-dimension input vector
@@ -25,6 +24,7 @@ class Network():
             return
 
         self.model = keras.Sequential()
+        self.WEIGHT_CONSTANT = 0.5
         self.fitness = -1
         self.input_dim = input_dim
         self.output_dim = output_n
@@ -42,6 +42,8 @@ class Network():
         # add activation for classification, no activation for float output
         self.model.add(Dense(output_n, name="output"))
 
+        # keep weights the same
+
         print("Network Initialization Success")
 
         if print_graph: self.model.summary()
@@ -49,6 +51,19 @@ class Network():
     def get_category(self, run_results):
         run_results = list(run_results)[0]
         return [max(run_results)]
+
+    def strip_to_components(self, index):
+        return [self.layer_dims, self.layer_types, index]
+
+    def get_printable(self):
+        formatted = ''
+        for i, dim in enumerate(self.layer_dims):
+            formatted += str(dim)
+            formatted += "" if i == len(self.layer_dims) - 1 else "-"
+        formatted += ","
+        for i, layer in enumerate(self.layer_types):
+            formatted += (layer.__name__ if layer != None else "None") + ("" if i == len(self.layer_types)-1 else "-")
+        return formatted
 
     def run(self, inputs):
         return self.model.predict(inputs)
