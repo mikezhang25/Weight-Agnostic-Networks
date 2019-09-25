@@ -1,0 +1,7 @@
+Best Fitness: -0.10034
+97-43-19-61-50-46-45-99-68-84-89,None-softmax-sigmoid-tanh-sigmoid-relu-sigmoid-softmax-softmax-relu-sigmoid
+97-71-2-92-23-41-59-83-65-31-87-5-19-38-70-46,None-tanh-tanh-tanh-sigmoid-tanh-tanh-sigmoid-relu-sigmoid-tanh-sigmoid-sigmoid-sigmoid-relu-relu
+97-53-16-68-4-14-100-94-38-51-20-69-20-79-72,None-relu-softmax-softmax-sigmoid-softmax-tanh-relu-tanh-sigmoid-relu-sigmoid-sigmoid-tanh-relu
+97-80-42-56-78-12-86-63-55,None-sigmoid-relu-softmax-sigmoid-softmax-relu-tanh-relu
+97-55-26-92-59-68-67-94-55-74-8-50-33-37-16-25-8-33-68-77,None-sigmoid-sigmoid-relu-sigmoid-tanh-softmax-sigmoid-tanh-tanh-sigmoid-softmax-softmax-relu-softmax-softmax-tanh-tanh-sigmoid-softmax
+97-47-82-99-58-67-87-73-59-88-26-88-35-51,None-sigmoid-softmax-sigmoid-relu-sigmoid-sigmoid-relu-sigmoid-sigmoid-relu-tanh-softmax-relu

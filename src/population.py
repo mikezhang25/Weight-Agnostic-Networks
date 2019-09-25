@@ -4,6 +4,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 import random as r
+import progressbar
 import network as net
 
 import warnings
@@ -44,6 +45,30 @@ class Population:
                     layer_activations
                 ))
 
+    def load_from_file(self, path_to_file):
+        self.members = []
+        print("Loading data from %s..." % path_to_file)
+        f = open(path_to_file, "r")
+        members = f.readlines()
+        bar = progressbar.ProgressBar(maxval=len(members),
+                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        bar.start()
+        for i, member in enumerate(members):
+            if not i:
+                continue
+            layer_sizes, layer_types = member.split(',')
+            layer_sizes = [int(x) for x in layer_sizes.split('-')]
+            layer_types = [self.map_activation[x.rstrip('\n')] if x != 'None' else None for x in layer_types.split('-')]
+            self.members.append(net.Network(
+                self.inputs,
+                self.outputs,
+                layer_sizes,
+                layer_types
+            ))
+            bar.update(i)
+        bar.finish()
+        f.close()
+
     def set_evaluator(self, evaluator):
         self.evaluator = evaluator
 
@@ -67,6 +92,7 @@ class Population:
         print("Saving Current Generation...")
         self.members.sort(key=lambda x: x.fitness)
         f = open(save_file, "w+")
+        f.write("Best Fitness: %.5f\n" % (self.members[0].fitness))
         for network in self.members:
             f.write(str(network.get_printable()) + '\n')
         f.close()
@@ -90,7 +116,6 @@ class Population:
         print("Evolved Generation ", self.gen_count)
         print("---------------------------------------------------")
 
-    # TODO: Verify that positive-negative fitness mix doesn't screw up the norm
     def get_normalized_fitness(self):
         # evaluate fitness for every member
         fitnesses = self.evaluator.eval_fitnesses(self.members)
@@ -156,3 +181,7 @@ class Population:
         for i, member in enumerate(self.members):
             formatted += ("Member %d:\n" % (i+1)) + str(member) + "\n-----------------------------\n"
         return formatted
+
+if __name__ == '__main__':
+    pop = Population(0, 1, 1)
+    pop.load_from_file("./autogen_dir_9/gen-1.txt")

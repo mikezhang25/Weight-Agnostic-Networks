@@ -84,6 +84,10 @@ class EnvorionmentTest(ut.TestCase):
                     break
         simulator.close()
 
+    def test_load_pop_from_file(self):
+        pop = population.Population(0, 1, 1)
+        pop.load_from_file("./autogen_dir_9/gen-1.txt")
+
     def test_crossover(self):
         parent_a = network.Network(1, 2,
                                   [11, 9, 7, 5, 3],
