@@ -1,9 +1,13 @@
 """ Contains the Population class, which handles members, evolution, and breeding """
 
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 import random as r
 import network as net
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class Population:
 
