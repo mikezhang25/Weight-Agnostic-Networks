@@ -71,7 +71,7 @@ class Population:
             f.write(str(network.get_printable()) + '\n')
         f.close()
         print("Current Generation Successfully Saved")
-        print("Best Fitness: %d" % self.members[0].fitness)
+        print("Best Fitness ", self.members[0].fitness)
         # save members by order of fitness
         mating_pool = self.get_mating_pool(norm_fitness)
 
