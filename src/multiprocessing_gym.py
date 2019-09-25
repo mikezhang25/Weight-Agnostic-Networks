@@ -13,7 +13,7 @@ class SubprocVecEnv():
         self.remotes, self.work_remotes = \
             zip(*[Pipe() for _ in range(no_of_envs)])
         self.processes = []
-        mpg.log_to_stderr(logging.DEBUG)
+        # mpg.log_to_stderr(logging.DEBUG)
 
         for wrk, rem, fn in zip(self.work_remotes, self.remotes, env_fns):
             proc = Process(target=worker,

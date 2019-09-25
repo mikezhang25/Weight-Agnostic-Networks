@@ -1,0 +1,8 @@
+38-25-96-92-18-57-49-51-85-4-44-58-70,None-tanh-relu-relu-tanh-softmax-tanh-sigmoid-sigmoid-tanh-sigmoid-tanh-relu
+38-14-26-43-39-1-95-43-73-52-40-26-91-18-64-80-49-100-22-48,None-sigmoid-softmax-tanh-softmax-sigmoid-tanh-tanh-tanh-sigmoid-relu-relu-sigmoid-softmax-sigmoid-tanh-sigmoid-sigmoid-softmax-tanh
+38-95-49-9-22-54-35-81,None-relu-relu-sigmoid-softmax-tanh-softmax-sigmoid
+38-78-23-69-11-54-98-68-62-6-23-76,None-tanh-relu-softmax-tanh-softmax-relu-sigmoid-tanh-softmax-softmax-tanh
+38-44-7-33-73-27-30-56-28-33-46-35-12-2-82-24-60,None-sigmoid-tanh-softmax-relu-sigmoid-sigmoid-softmax-tanh-sigmoid-softmax-tanh-softmax-softmax-softmax-sigmoid-softmax
+38-78-94-50-41,None-sigmoid-softmax-softmax-sigmoid
+38-37-45-53-7-12-71-16-57-44-13-22-78,None-tanh-sigmoid-relu-relu-tanh-relu-softmax-sigmoid-tanh-softmax-softmax-relu
+38-78-70-66-27-58-40-100-8-95-38-48,None-softmax-tanh-sigmoid-softmax-sigmoid-relu-relu-relu-softmax-relu-tanh
