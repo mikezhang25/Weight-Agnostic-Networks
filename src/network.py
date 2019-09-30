@@ -1,5 +1,10 @@
 """ Contains Network class, which constitutes an individual in the population """
 
+import tensorflow as tf
+import tensorflow.python.util.deprecation as deprecation
+tf.logging.set_verbosity(tf.logging.ERROR)
+deprecation._PRINT_DEPRECATION_WARNINGS = False
+
 class Network:
 
     def __init__(self, input_dim, output_n, layer_dim, layer_types, dropout=0.5, print_graph=False):
@@ -43,18 +48,28 @@ class Network:
 
         # keep weights the same
 
-        print("Network Initialization Success")
+        # print("Network Initialization Success")
 
         if print_graph: self.model.summary()
 
     def get_category(self, run_results):
+        """ Ad-hoc activation function, converts analog output to digital when necessary """
         run_results = list(run_results)[0]
         return [max(run_results)]
 
     def strip_to_components(self, index):
+        """
+        Breaks down the network into it's init parameters
+        :param index: index in population
+        :return: [layer_dimensions, layer_activations, index_in_pop]
+        """
         return [self.layer_dims, self.layer_types, index]
 
     def get_printable(self):
+        """
+        Returns savable and recoverable version of the network
+        :return: None
+        """
         formatted = ''
         for i, dim in enumerate(self.layer_dims):
             formatted += str(dim)
@@ -65,6 +80,11 @@ class Network:
         return formatted
 
     def run(self, inputs):
+        """
+        Runs a set of data through the network
+        :param inputs: input data (must fit input shape)
+        :return: network outputs (analog)
+        """
         return self.model.predict(inputs)
 
     def tune_weights(self, train_data, train_labels, epochs=1, batch_size=64):
