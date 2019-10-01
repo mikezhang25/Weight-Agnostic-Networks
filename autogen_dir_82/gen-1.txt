@@ -1,0 +1,2 @@
+Best Fitness: -0.00000
+33-98-59-52-21-13-74-7-67-17-33-46,None-tanh-softmax-relu-sigmoid-sigmoid-sigmoid-tanh-tanh-relu-relu-tanh

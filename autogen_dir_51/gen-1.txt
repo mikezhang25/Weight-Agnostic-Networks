@@ -1,0 +1,2 @@
+Best Fitness: -0.00000
+71-74-44-79-95-10-53-94-85-58-57-54-53-36-97,None-tanh-sigmoid-softmax-sigmoid-tanh-sigmoid-sigmoid-relu-relu-tanh-tanh-softmax-relu-relu
