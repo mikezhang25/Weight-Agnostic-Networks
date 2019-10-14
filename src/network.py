@@ -1,9 +1,12 @@
 """ Contains Network class, which constitutes an individual in the population """
 
 import tensorflow as tf
+
 import tensorflow.python.util.deprecation as deprecation
 tf.logging.set_verbosity(tf.logging.ERROR)
 deprecation._PRINT_DEPRECATION_WARNINGS = False
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class Network:
 
@@ -36,17 +39,19 @@ class Network:
         self.layer_types = layer_types
 
         # input layer, must specify input shape
-        self.model.add(Dense(layer_dim[0], activation=layer_types[0], input_shape=(input_dim,), name="input_layer"))
+        self.model.add(Dense(layer_dim[0], activation=layer_types[0], input_shape=(input_dim,), name="input_layer",
+                             kernel_initializer=keras.initializers.Constant(value=self.WEIGHT_CONSTANT)))
 
         # add hidden and output layers
         for i in range(1, len(layer_dim)):
             # self.model.add(Dropout(dropout, name="intermediate_%d"%i))
-            self.model.add(Dense(layer_dim[i], activation=layer_types[i], name="hidden_layer_%d"%i))
+            # keep tensor values constant throughout graphs
+            self.model.add(Dense(layer_dim[i], activation=layer_types[i], name="hidden_layer_%d"%i,
+                                 kernel_initializer=keras.initializers.Constant(value=self.WEIGHT_CONSTANT)))
 
         # add activation for classification, no activation for float output
-        self.model.add(Dense(output_n, name="output"))
-
-        # keep weights the same
+        self.model.add(Dense(output_n, name="output",
+                             kernel_initializer=keras.initializers.Constant(value=self.WEIGHT_CONSTANT)))
 
         # print("Network Initialization Success")
 

@@ -8,6 +8,7 @@ class GameMaster:
     def __init__(self, env_name, thread_num=12):
         self.envs = [gym.make(env_name) for _ in range(thread_num)]
         self.n = thread_num
+        self.count = 0
 
     def eval_fitnesses(self, networks, time_steps=1000, render=False):
         self.count = 0
@@ -16,13 +17,15 @@ class GameMaster:
         bar = progressbar.ProgressBar(maxval=len(networks),
                                       widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
+        # TODO: Make this bar global so can have closer analog output
         for batch in range(0, len(networks), self.n):
             pool = Pool(processes=self.n)
             net_stripped = [network.strip_to_components(i) for i, network in enumerate(networks[batch:batch+self.n])]
             results = pool.map(partial(self.eval, time_steps, render, networks[0].input_dim, networks[0].output_dim),
                         net_stripped)
             fitnesses += results
-            bar.update(self.count)
+            bar.update(batch)
+            pool.close()
         bar.finish()
         return fitnesses
 

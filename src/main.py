@@ -21,11 +21,23 @@ if __name__ == '__main__':
     except FileExistsError:
         resume = input("Resume Training? (Y/N)\n>>> ")
 
+    print("Run Session Specifics:\n \
+     || Population Size: %d\n \
+     || Concurrent Training Space: %d \n \
+     || Save progress at %s\n \
+     || %s" % (
+        args['popsize'],
+        args['threadcount'],
+        args['save'] if args['save'] else 'a random new directory',
+        "Resuming Training" if resume else "Initializing Training Process"
+    ))
+
     mp = gm.GameMaster('MountainCarContinuous-v0', thread_num=args['threadcount'])
     crowd = pop.Population(0 if resume else args['popsize'], 1, 1, evaluator=mp)
     if resume:
-        latest_gen = len([name for name in os.listdir("./" + args['save']) if os.path.isfile(name)])
+        latest_gen = len(os.listdir("./" + args['save']))
         crowd.load_from_file("./" + args['save'] + "/gen-" + str(latest_gen+1) + ".txt")
+        crowd.gen_count = latest_gen+1
 
     # norm_fitness = crowd.get_normalized_fitness()
     # mating_pool = crowd.get_mating_pool(norm_fitness)

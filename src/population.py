@@ -65,7 +65,7 @@ class Population:
         """
         Load population from a data file
         :param path_to_file: relative path to data file
-        :return: None
+        :return: best fitness
         """
         self.members = []
         print("Loading data from %s..." % path_to_file)
@@ -74,8 +74,10 @@ class Population:
         bar = progressbar.ProgressBar(maxval=len(members),
                                       widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
+        best_fitness = None
         for i, member in enumerate(members):
             if not i:
+                best_fitness = float(member.split(' ')[2])
                 continue
             layer_sizes, layer_types = member.split(',')
             layer_sizes = [int(x) for x in layer_sizes.split('-')]
@@ -89,6 +91,7 @@ class Population:
             bar.update(i)
         bar.finish()
         f.close()
+        return best_fitness
 
     def set_evaluator(self, evaluator):
         self.evaluator = evaluator
@@ -141,9 +144,11 @@ class Population:
             print("Best Fitness ", self.members[0].fitness)
         # save members by order of fitness
         mating_pool = self.get_mating_pool(norm_fitness)
+        assert(len(mating_pool) != 0, "The mating pool is empty")
 
         new_pop = []
         while len(new_pop) < len(self.members):
+            # TODO: Fix the zero range problem (idk why it happens)
             # choose two parents at random
             a = r.randint(0, len(mating_pool) - 1)
             b = r.randint(0, len(mating_pool) - 1)
