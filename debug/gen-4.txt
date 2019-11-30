@@ -1,0 +1,11 @@
+Best Fitness: -126519822.26406
+53-59-1-91-53-53-59-91-76-56-53-91-53-59,relu-relu-tanh-tanh-relu-relu-relu-tanh-sigmoid-softmax-relu-tanh-relu-relu
+53-49-1-91-53-53-59-91-90-48-53,relu-tanh-tanh-tanh-relu-relu-relu-tanh-softmax-tanh-relu
+53-49-1-53-82-52-9-84-1-66-37-1-53-49,relu-tanh-tanh-relu-softmax-tanh-tanh-softmax-tanh-tanh-tanh-tanh-relu-tanh
+53-49-1-53-29-1-1-49-1-48-49-81-53-49,relu-tanh-tanh-relu-relu-tanh-tanh-tanh-tanh-tanh-tanh-softmax-relu-tanh
+60-99-55-91-56-52-59-84-76-66-35-81-43-38,relu-relu-relu-tanh-softmax-tanh-relu-softmax-sigmoid-tanh-relu-softmax-relu-tanh
+60-99-55-21-56-52-9-21-76-66-53-41-43-38,relu-relu-relu-relu-softmax-tanh-tanh-tanh-sigmoid-tanh-relu-softmax-relu-tanh
+60-49-62-91-82-52-9-21-86-48-35-81-36-38,relu-tanh-tanh-tanh-softmax-tanh-tanh-tanh-softmax-tanh-relu-softmax-softmax-tanh
+63-22-1-91-82-52-9-84-90-48-37-81-36-38,tanh-relu-tanh-tanh-softmax-tanh-tanh-softmax-softmax-tanh-tanh-softmax-softmax-tanh
+53-49,relu-tanh
+53-49,relu-tanh

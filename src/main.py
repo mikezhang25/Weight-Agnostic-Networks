@@ -1,8 +1,9 @@
 """ The main driver function for population testing and simulation """
 
+from parameters import *
 import population as pop
 import gamemaster as gm
-import os, os.path
+import os
 import random as r
 import argparse
 
@@ -19,7 +20,7 @@ if __name__ == '__main__':
         if args['save']:
             os.makedirs("./" + args['save'])
     except FileExistsError:
-        resume = input("Resume Training? (Y/N)\n>>> ")
+        resume = input("Resume Training? (Y/N)\n>>> ") == 'Y'
 
     print("Run Session Specifics:\n \
      || Population Size: %d\n \
@@ -32,8 +33,8 @@ if __name__ == '__main__':
         "Resuming Training" if resume else "Initializing Training Process"
     ))
 
-    mp = gm.GameMaster('MountainCarContinuous-v0', thread_num=args['threadcount'])
-    crowd = pop.Population(0 if resume else args['popsize'], 1, 1, evaluator=mp)
+    mp = gm.GameMaster(thread_num=args['threadcount'])
+    crowd = pop.Population(0 if resume else args['popsize'], evaluator=mp)
     if resume:
         latest_gen = len(os.listdir("./" + args['save']))
         crowd.load_from_file("./" + args['save'] + "/gen-" + str(latest_gen+1) + ".txt")

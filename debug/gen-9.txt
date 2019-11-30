@@ -1,0 +1,11 @@
+Best Fitness: -42152.55625
+60-99-53-53-56-52-53-49-53,relu-relu-relu-relu-softmax-tanh-relu-tanh-relu
+60-99-53-53-56-52-53-49-53,relu-relu-relu-relu-softmax-tanh-relu-tanh-relu
+60-99-62-53-56-52-53-49-53,relu-relu-tanh-relu-softmax-tanh-relu-tanh-relu
+60-99-53-53-56-52-9-49-53,relu-relu-relu-relu-softmax-tanh-tanh-tanh-relu
+60-99-53-53-56-52-9-49-53,relu-relu-relu-relu-softmax-tanh-tanh-tanh-relu
+60-99-62-53-56-52-53-21-53,relu-relu-tanh-relu-softmax-tanh-relu-tanh-relu
+60-99-62-53-56-52-9-21-53,relu-relu-tanh-relu-softmax-tanh-tanh-tanh-relu
+60-99-53-53-56-52-9-21-53,relu-relu-relu-relu-softmax-tanh-tanh-tanh-relu
+60-99-53-53-56-52-53-49-76,relu-relu-relu-relu-softmax-tanh-relu-tanh-sigmoid
+60-99-62-53-56-52-53-21-76,relu-relu-tanh-relu-softmax-tanh-relu-tanh-sigmoid

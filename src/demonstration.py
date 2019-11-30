@@ -3,6 +3,7 @@
 import os
 import argparse
 import gym
+from parameters import *
 import population as pop
 import gamemaster as gm
 

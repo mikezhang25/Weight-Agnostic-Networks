@@ -1,60 +1,38 @@
 """ Contains the Population class, which handles members, evolution, and breeding """
 
+import warnings
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow as tf
-import tensorflow.python.util.deprecation as deprecation
-tf.logging.set_verbosity(tf.logging.ERROR)
-deprecation._PRINT_DEPRECATION_WARNINGS = False
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=FutureWarning)
 import random as r
 import progressbar
+from parameters import *
 import network as net
-
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class Population:
     """
     Contains a fixed-size group of networks to evolve
     """
 
-    def __init__(self, pop_size, input_shape, output_shape, random_init=True, evaluator=None):
-        # random init params
-        self.MAX_LAYER_SIZE = 100
-        self.MAX_LAYER_COUNT = 20
-        self.valid_activations = [
-            "relu",
-            "tanh",
-            "sigmoid",
-            "softmax"
-        ]
-        self.map_activation = {
-            "relu": tf.nn.relu,
-            "tanh": tf.nn.tanh,
-            "sigmoid": tf.nn.sigmoid,
-            "softmax": tf.nn.softmax
-        }
-
+    def __init__(self, pop_size, random_init=True, evaluator=None):
         # autosave init parameters
         self.gen_count = 0
-        self.inputs = input_shape
-        self.outputs = output_shape
+        self.n= pop_size
         self.members = []
         self.evaluator = evaluator
 
         if random_init:
-            input_hidden_nodes = r.randint(1, self.MAX_LAYER_SIZE)
             print("Creating Population...")
             bar = progressbar.ProgressBar(maxval=pop_size,
                                           widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
             bar.start()
             for member in range(pop_size):
-                n = r.randint(3, self.MAX_LAYER_COUNT)
-                layer_dim = [input_hidden_nodes] + [r.randint(1, self.MAX_LAYER_SIZE) for i in range(n-1)]
-                layer_activations = [None] + [self.map_activation[self.valid_activations[r.randint(0, len(self.valid_activations)-1)]] for i in range(n-1)]
+                n = r.randint(2, MAX_NETWORK_SIZE)
+                layer_dim = [r.randint(1, MAX_LAYER_SIZE) for i in range(n)]
+                layer_activations = [VALID_ACTIVATIONS[r.randint(0, len(VALID_ACTIVATIONS)-1)] for i in range(n)]
                 self.members.append(net.Network(
-                    input_shape,
-                    output_shape,
                     layer_dim,
                     layer_activations
                 ))
@@ -81,10 +59,8 @@ class Population:
                 continue
             layer_sizes, layer_types = member.split(',')
             layer_sizes = [int(x) for x in layer_sizes.split('-')]
-            layer_types = [self.map_activation[x.rstrip('\n')] if x != 'None' else None for x in layer_types.split('-')]
+            layer_types = [x.rstrip('\n') if x != 'None' else None for x in layer_types.split('-')]
             self.members.append(net.Network(
-                self.inputs,
-                self.outputs,
                 layer_sizes,
                 layer_types
             ))
@@ -119,20 +95,22 @@ class Population:
         :return: None
         """
         if self.evaluator == None:
-            print("Population Error 1: No evaluator specified. Use <population>.set_evaluator() to specify evaluator")
+            print("Evolution Error: No evaluator specified. Use <population>.set_evaluator() to specify evaluator")
             return
+
+        # use roulette-wheel style of fitness scaling
+        wheel = self.get_normalized_fitness()
 
         print("---------------------------------------------------")
         print("Evolving from Generation ", self.gen_count, "...")
-        norm_fitness = self.get_normalized_fitness()
-        assert(sum(norm_fitness) != 0)
 
         if save_progress:
             print("Saving Current Generation...")
             bar = progressbar.ProgressBar(maxval=len(self.members),
                                           widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
             bar.start()
-            self.members.sort(key=lambda x: x.fitness)
+
+            self.members.sort(key=lambda x: x.fitness, reverse=True)
             f = open(save_dir, "w+")
             f.write("Best Fitness: %.5f\n" % (self.members[0].fitness))
             for i, network in enumerate(self.members):
@@ -142,31 +120,31 @@ class Population:
             f.close()
             print("Current Generation Successfully Saved")
             print("Best Fitness ", self.members[0].fitness)
-        # save members by order of fitness
-        mating_pool = self.get_mating_pool(norm_fitness)
-        assert(len(mating_pool) != 0, "The mating pool is empty")
 
-        new_pop = []
-        while len(new_pop) < len(self.members):
-            # TODO: Fix the zero range problem (idk why it happens)
+        if ELITISM:
+            new_pop = [self.members[0]]
+            if self.n%2==0: new_pop.append(self.members[1])
+        while len(new_pop) < self.n:
             # choose two parents at random
-            a = r.randint(0, len(mating_pool) - 1)
-            b = r.randint(0, len(mating_pool) - 1)
-            parent_a = mating_pool[a]
-            parent_b = mating_pool[b]
-            while parent_a == parent_b: parent_b = mating_pool[r.randint(0, len(mating_pool)-1)]
+            a = self.pick_parent(wheel)
+            while a >= len(self.members): a = self.pick_parent(wheel)
+            b = self.pick_parent(wheel)
+            while b == a or b >= len(self.members): b = self.pick_parent(wheel)
+            parent_a = self.members[a]
+            parent_b = self.members[b]
 
             child_a, child_b = self.cross(parent_a, parent_b)
             new_pop.append(child_a)
             new_pop.append(child_b)
 
         self.gen_count += 1
+        self.members = new_pop
         print("Evolved Generation ", self.gen_count)
         print("---------------------------------------------------")
 
     def get_normalized_fitness(self):
         """
-
+        Evaluates fitnesses of every member and ensures that they all sum to 100 (makes creating the pool easier)
         :return:
         """
         # evaluate fitness for every member
@@ -180,25 +158,31 @@ class Population:
             fitnesses = [val+abs(displacement)+1 for val in fitnesses]
 
         # create mating pool
-        # normalize values
+        # normalize values to probabilities
         norm = [i/sum(fitnesses) for i in fitnesses]
 
         return norm
 
-    def get_mating_pool(self, norm_fitness):
-        # generate mating pools based on normalized probability
-        mating_pool = []
-        for i in range(len(norm_fitness)):
-            for count in range(int(norm_fitness[i]*100)):
-                mating_pool.append(self.members[i])
-
-        return mating_pool
+    def pick_parent(self, wheel):
+        """
+        Picks a random member from the roulette wheel
+        :param wheel: array of roulette fitness weights
+        :return: index of parent chosen
+        """
+        # scale the values up so that we can hit the last index as well
+        val = r.random()*(1+abs(min(wheel)))
+        sum = 0
+        i = 0
+        while sum < val and i <= len(wheel):
+            if i < len(wheel): sum += wheel[i]
+            i += 1
+        return i-1
 
     def cross(self, parent_a, parent_b):
         # child a has same layer num as parent a
         layer_dims = []
         layer_types = []
-        for index in range(len(parent_a.layer_dims)-1):
+        for index in range(len(parent_a.layer_dims)):
             # print("Configing Layer ", index)
             parent = r.randint(0, 1)
             # print("Choosing parent %s" % ('A' if parent else 'B'))
@@ -206,14 +190,13 @@ class Population:
                 layer_dims.append(parent_a.layer_dims[index])
                 layer_types.append(parent_a.layer_types[index])
             else:
-                layer_dims.append(parent_b.layer_dims[index%(len(parent_b.model.layers)-1)])
-                layer_types.append(parent_b.layer_types[index%(len(parent_b.model.layers)-1)])
-            # print("New Layer:\n\tSize: %d\n\tType: %s" % (layer_dims[len(layer_dims)-1], layer_types[len(layer_types)-1]))
-        child_a = net.Network(parent_a.input_dim, parent_a.output_dim, layer_dims, layer_types)
+                layer_dims.append(parent_b.layer_dims[index%len(parent_b.layer_dims)])
+                layer_types.append(parent_b.layer_types[index%len(parent_b.layer_dims)])
+        child_a = net.Network(layer_dims, layer_types)
 
         layer_dims = []
         layer_types = []
-        for index in range(len(parent_b.layer_dims)-1):
+        for index in range(len(parent_b.layer_dims)):
             # print("Configing Layer ", index)
             parent = r.randint(0, 1)
             # print("Choosing parent %s" % ('A' if parent else 'B'))
@@ -221,11 +204,11 @@ class Population:
                 layer_dims.append(parent_b.layer_dims[index])
                 layer_types.append(parent_b.layer_types[index])
             else:
-                layer_dims.append(parent_a.layer_dims[index % (len(parent_a.model.layers) - 1)])
-                layer_types.append(parent_a.layer_types[index % (len(parent_a.model.layers) - 1)])
+                layer_dims.append(parent_a.layer_dims[index % len(parent_a.layer_dims)])
+                layer_types.append(parent_a.layer_types[index % len(parent_a.layer_dims)])
             # print("New Layer:\n\tSize: %d\n\tType: %s" % (layer_dims[len(layer_dims)-1], layer_types[len(layer_types)-1]))
 
-        child_b = net.Network(parent_b.input_dim, parent_b.output_dim, layer_dims, layer_types)
+        child_b = net.Network(layer_dims, layer_types)
         return child_a, child_b
 
     def __str__(self):
